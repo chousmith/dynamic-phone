@@ -1,29 +1,27 @@
 <?php
 
+add_action( 'admin_menu', 'dynamic_phone_admin_menu' );
 
-
-add_action( 'admin_menu', 'nlk_admin_menu' );
-
-//create admin menu item
-function nlk_admin_menu() {
-	add_menu_page('Dynamic Phone', 'Dynamic Phone', 'manage_options', 'dynamic-phone', 'nlk_dynamic_phone_shortcode');
-	add_submenu_page( 'dynamic-phone', 'Shortcode', 'Shortcode', 'manage_options', 'dynamic-phone', 'nlk_dynamic_phone_shortcode' );
-	add_submenu_page( 'dynamic-phone', 'Triggers', 'Triggers', 'manage_options', 'dynamic-phone-triggers', 'nlk_dynamic_phone_triggers' );
-	add_submenu_page( 'dynamic-phone', 'Numbers', 'Numbers', 'manage_options', 'dynamic-phone-numbers', 'nlk_dynamic_phone_numbers' );
+//create admin menu items
+function dynamic_phone_admin_menu() {
+	add_menu_page('Dynamic Phone', 'Dynamic Phone', 'manage_options', 'dynamic-phone', 'dynamic_phone_shortcode');
+	add_submenu_page( 'dynamic-phone', 'Shortcode', 'Shortcode', 'manage_options', 'dynamic-phone', 'dynamic_phone_shortcode' );
+	add_submenu_page( 'dynamic-phone', 'Triggers', 'Triggers', 'manage_options', 'dynamic-phone-triggers', 'dynamic_phone_triggers' );
+	add_submenu_page( 'dynamic-phone', 'Numbers', 'Numbers', 'manage_options', 'dynamic-phone-numbers', 'dynamic_phone_numbers' );
 }
 
 
-function nlk_admin_scripts() {
+function dynamic_phone_admin_scripts() {
 
-    wp_register_script( 'jquery_watermark', NLK_PLUGIN_URL . 'js/jquery.watermark.min.js', array('jquery'). '1.3.3' );
-    wp_register_script( 'nlk_admin_js', NLK_PLUGIN_URL . 'js/admin.js', array('jquery', 'jquery_watermark'). '1.0' );
-    wp_register_style( 'nlk_admin_css', NLK_PLUGIN_URL . 'css/admin.css', array(). '1.0' );
+    wp_register_script( 'jquery_watermark', DYNAMIC_PHONE_PLUGIN_URL . 'includes/jquery.watermark.min.js', array('jquery'). '1.3.3' );
+    wp_register_script( 'dynamic_phone_admin_js', DYNAMIC_PHONE_PLUGIN_URL . 'includes/admin.js', array('jquery', 'jquery_watermark'). '1.0' );
+    wp_register_style( 'dynamic_phone_admin_css', DYNAMIC_PHONE_PLUGIN_URL . 'includes/admin.css', array(). '1.0' );
 
     wp_enqueue_script( 'jquery_watermark' );
-    wp_enqueue_script( 'nlk_admin_js' );
-    wp_enqueue_style( 'nlk_admin_css' );
+    wp_enqueue_script( 'dynamic_phone_admin_js' );
+    wp_enqueue_style( 'dynamic_phone_admin_css' );
 }
-add_action( 'admin_enqueue_scripts', 'nlk_admin_scripts' );
+add_action( 'admin_enqueue_scripts', 'dynamic_phone_admin_scripts' );
 
 
 
@@ -33,45 +31,45 @@ add_action( 'admin_enqueue_scripts', 'nlk_admin_scripts' );
 //
 
 // set new options on save
-if($_POST['nlk_dynamic_phone']['settings_submit'] == '1') {
+if($_POST['dynamic_phone']['settings_submit'] == '1') {
 
-	$a = get_option( 'nlk_dynamic_phone', array() );
+	$a = get_option( 'dynamic_phone', array() );
 
-	if ( $_POST['nlk_dynamic_phone']['shortcode'] ) {
-		foreach ( $_POST['nlk_dynamic_phone']['shortcode'] as $k => $v ) {
+	if ( $_POST['dynamic_phone']['shortcode'] ) {
+		foreach ( $_POST['dynamic_phone']['shortcode'] as $k => $v ) {
 			$a['shortcode'][ $k ] = $v;
 		}
 	}
 
-	if ( $_POST['nlk_dynamic_phone']['triggers'] ) {
-		foreach ( $_POST['nlk_dynamic_phone']['triggers'] as $k => $v ) {
+	if ( $_POST['dynamic_phone']['triggers'] ) {
+		foreach ( $_POST['dynamic_phone']['triggers'] as $k => $v ) {
 			$a['triggers'][ $k ] = $v;
 		}
 	}
 
-	if ( $_POST['nlk_dynamic_phone']['numbers'] ) {
-		foreach ( $_POST['nlk_dynamic_phone']['numbers'] as $k => $v ) {
+	if ( $_POST['dynamic_phone']['numbers'] ) {
+		foreach ( $_POST['dynamic_phone']['numbers'] as $k => $v ) {
 			$a['numbers'][ $k ] = $v;
 		}
 	}
 
-	update_option( 'nlk_dynamic_phone', $a );
+	update_option( 'dynamic_phone', $a );
 
-	$result = get_option( 'nlk_dynamic_phone', array() );
+	$result = get_option( 'dynamic_phone', array() );
 
 	echo '<div id="message" class="updated fade"><p><strong>' . __('Settings saved.') . '</strong></p><pre style="display:none;">';
 	print_r($result);
 	echo '</pre></div>';
 
 }
-$nlk_dynamic_phone = get_option('nlk_dynamic_phone');
+$dynamic_phone = get_option('dynamic_phone');
 
 
 // wrap pages in generic form
-function nlk_admin_form_wrapper( $begin = true ) {
+function dynamic_phone_admin_form_wrapper( $begin = true ) {
 	if ( $begin ) { ?>
-		<form name="nlk_admin_form" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
-		<input type="hidden" name="nlk_dynamic_phone[settings_submit]" value="1" />
+		<form name="dynamic_phone_admin" class="dynamic_phone_admin" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
+		<input type="hidden" name="dynamic_phone[settings_submit]" value="1" />
 	<?php }
 	else { ?>
 		<p class="submit"><input type="submit" name="Submit" value="Submit" /></p>
@@ -80,11 +78,11 @@ function nlk_admin_form_wrapper( $begin = true ) {
 }
 
 // SHORTCODE page
-function nlk_dynamic_phone_shortcode() { ?>
-	<?php global $nlk_dynamic_phone; ?>
+function dynamic_phone_shortcode() { ?>
+	<?php global $dynamic_phone; ?>
 	<div class="wrap">
-		<?php echo "<h2>" . __( 'Dynamic Phone: Shortcodes', 'nlklang' ) . "</h2>"; ?>
-		<?php nlk_admin_form_wrapper(); ?>
+		<?php echo "<h2>" . __( 'Dynamic Phone: Shortcodes' ) . "</h2>"; ?>
+		<?php dynamic_phone_admin_form_wrapper(); ?>
 			<section>
 				<p>Place the following shortcode wherever you would like dynamic phone number replacement to occur.<br />
 					Then use the dynamic phone numbers and triggers to control options.</p>
@@ -124,21 +122,21 @@ function nlk_dynamic_phone_shortcode() { ?>
 
 				<h3>Allow Shortcode in Widgets</h3>
 
-				<p><input type="checkbox" name="nlk_dynamic_phone[shortcode][allow_in_widget]" value="yes" <?php if ( $nlk_dynamic_phone['shortcode']['allow_in_widget'] == 'yes' ) { echo 'checked="checked"'; } ?> />
+				<p><input type="checkbox" name="dynamic_phone[shortcode][allow_in_widget]" value="yes" <?php if ( $dynamic_phone['shortcode']['allow_in_widget'] == 'yes' ) { echo 'checked="checked"'; } ?> />
 					&nbsp;&nbsp;By default WordPress does not allow shortcodes in widget area. Check here to turn on this feature.</p>
 				
 			</section>
-		<?php nlk_admin_form_wrapper( false ); ?>
+		<?php dynamic_phone_admin_form_wrapper( false ); ?>
 	</div>
 	<?php
 }
 
 // TRIGGERS page
-function nlk_dynamic_phone_triggers() { ?>
-	<?php global $nlk_dynamic_phone; ?>
+function dynamic_phone_triggers() { ?>
+	<?php global $dynamic_phone; ?>
 	<div class="wrap">
-	    <?php echo "<h2>" . __( 'Dynamic Phone: Triggers', 'nlklang' ) . "</h2>"; ?>
-	    <?php nlk_admin_form_wrapper(); ?>
+	    <?php echo "<h2>" . __( 'Dynamic Phone: Triggers' ) . "</h2>"; ?>
+	    <?php dynamic_phone_admin_form_wrapper(); ?>
 			<section>
 				<h3>Usage</h3>
 
@@ -149,8 +147,8 @@ function nlk_dynamic_phone_triggers() { ?>
 							<dt><strong>URL query string example:</strong></dt>
 							<dd>
 								<ul>
-									<li><code><?php echo get_bloginfo('url'); ?>/index.php?<?php echo $nlk_dynamic_phone['triggers']['query_string_name'] ? $nlk_dynamic_phone['triggers']['query_string_name'] : 'phid'; ?>=3&amp;etc=true</code></li>
-									<li>where <code><?php echo $nlk_dynamic_phone['triggers']['query_string_name'] ? $nlk_dynamic_phone['triggers']['query_string_name'] : 'phid'; ?></code> is the query name, and <code>3</code> is the query value.</li>
+									<li><code><?php echo get_bloginfo('url'); ?>/index.php?<?php echo $dynamic_phone['triggers']['query_string_name'] ? $dynamic_phone['triggers']['query_string_name'] : 'phid'; ?>=3&amp;etc=true</code></li>
+									<li>where <code><?php echo $dynamic_phone['triggers']['query_string_name'] ? $dynamic_phone['triggers']['query_string_name'] : 'phid'; ?></code> is the query name, and <code>3</code> is the query value.</li>
 								</ul>
 							</dd>
 						</dl>
@@ -160,8 +158,8 @@ function nlk_dynamic_phone_triggers() { ?>
 							<dt><strong>Form field post example:</strong></dt>
 							<dd>
 								<ul>
-									<li><code>&lt;input type="hidden" name="<?php echo $nlk_dynamic_phone['triggers']['form_field_name'] ? $nlk_dynamic_phone['triggers']['form_field_name'] : 'phoneid'; ?>" value="xyz" /&gt;</code></li>
-									<li>where <code><?php echo $nlk_dynamic_phone['triggers']['form_field_name'] ? $nlk_dynamic_phone['triggers']['form_field_name'] : 'phoneid'; ?></code> is the POST name, and <code>xyz</code> is the form field value.</li>
+									<li><code>&lt;input type="hidden" name="<?php echo $dynamic_phone['triggers']['form_field_name'] ? $dynamic_phone['triggers']['form_field_name'] : 'phoneid'; ?>" value="xyz" /&gt;</code></li>
+									<li>where <code><?php echo $dynamic_phone['triggers']['form_field_name'] ? $dynamic_phone['triggers']['form_field_name'] : 'phoneid'; ?></code> is the POST name, and <code>xyz</code> is the form field value.</li>
 								</ul>
 							</dd>
 						</dl>
@@ -182,37 +180,37 @@ function nlk_dynamic_phone_triggers() { ?>
 				</p>
 				<p>&nbsp;</p>
 
-				<label for="nlk_dynamic_phone[triggers][query_string_name]">URL Query Name<br /><small>Add this query string and associated value(s) to your Adwords ads (for example)</small></label>
-				<input type="text" name="nlk_dynamic_phone[triggers][query_string_name]" value="<?php echo $nlk_dynamic_phone['triggers']['query_string_name']; ?>"/><br />
+				<label for="dynamic_phone[triggers][query_string_name]">URL Query Name<br /><small>Add this query string and associated value(s) to your Adwords ads (for example)</small></label>
+				<input type="text" name="dynamic_phone[triggers][query_string_name]" value="<?php echo $dynamic_phone['triggers']['query_string_name']; ?>"/><br />
 				<br />
-				<label for="nlk_dynamic_phone[triggers][form_field_name]">Form POST Name<br /><small>Use this form field name in contact / conversion forms</small></label>
-				<input type="text" name="nlk_dynamic_phone[triggers][form_field_name]" value="<?php echo $nlk_dynamic_phone['triggers']['form_field_name']; ?>"/><br />
+				<label for="dynamic_phone[triggers][form_field_name]">Form POST Name<br /><small>Use this form field name in contact / conversion forms</small></label>
+				<input type="text" name="dynamic_phone[triggers][form_field_name]" value="<?php echo $dynamic_phone['triggers']['form_field_name']; ?>"/><br />
 				<br />
-				<label for="nlk_dynamic_phone[triggers][cookie_name]">Cookie Name<br /><small>This cookie will contain dynamic phone number reference value. In addition, this is the name of the cookie that will be set to store dynamic number value</small></label>
-				<input type="text" name="nlk_dynamic_phone[triggers][cookie_name]" value="<?php echo $nlk_dynamic_phone['triggers']['cookie_name']; ?>"/><br />
+				<label for="dynamic_phone[triggers][cookie_name]">Cookie Name<br /><small>This cookie will contain dynamic phone number reference value. In addition, this is the name of the cookie that will be set to store dynamic number value</small></label>
+				<input type="text" name="dynamic_phone[triggers][cookie_name]" value="<?php echo $dynamic_phone['triggers']['cookie_name']; ?>"/><br />
 				<br />
-				<label for="nlk_dynamic_phone[triggers][cookie_lifetime]">Cookie Lifetime<br /><small>The time (in days) that this cookie will store the phone number reference value. Default is 7 days.</small></label>
-				<input type="text" name="nlk_dynamic_phone[triggers][cookie_lifetime]" value="<?php echo $nlk_dynamic_phone['triggers']['cookie_lifetime']; ?>"/><br />
+				<label for="dynamic_phone[triggers][cookie_lifetime]">Cookie Lifetime<br /><small>The time (in days) that this cookie will store the phone number reference value. Default is 7 days.</small></label>
+				<input type="text" name="dynamic_phone[triggers][cookie_lifetime]" value="<?php echo $dynamic_phone['triggers']['cookie_lifetime']; ?>"/><br />
 				<br />
 
 			</section>
-	    <?php nlk_admin_form_wrapper( false ); ?>
+	    <?php dynamic_phone_admin_form_wrapper( false ); ?>
 	</div>
 	<?php
 }
 
 // NUMBERS page
-function nlk_dynamic_phone_numbers() { ?>
-	<?php global $nlk_dynamic_phone; ?>
+function dynamic_phone_numbers() { ?>
+	<?php global $dynamic_phone; ?>
 	<div class="wrap">
-	    <?php echo "<h2>" . __( 'Dynamic Phone: Phone Numbers', 'nlklang' ) . "</h2>"; ?>
-	    <?php nlk_admin_form_wrapper(); ?>
+	    <?php echo "<h2>" . __( 'Dynamic Phone: Phone Numbers' ) . "</h2>"; ?>
+	    <?php dynamic_phone_admin_form_wrapper(); ?>
 			<section>
 
 				<h3>Default Phone Number</h3>
 
-				<label for="nlk_dynamic_phone[numbers][default_phone]">Default Phone Number</label>
-				<input type="text" name="nlk_dynamic_phone[numbers][default_phone]" value="<?php echo $nlk_dynamic_phone['numbers']['default_phone']; ?>" p-label="<?php echo $nlk_dynamic_phone['numbers']['default_phone'] ? $nlk_dynamic_phone['numbers']['default_phone'] : '888-555-0000'; ?>"/><br />
+				<label for="dynamic_phone[numbers][default_phone]">Default Phone Number</label>
+				<input type="text" name="dynamic_phone[numbers][default_phone]" value="<?php echo $dynamic_phone['numbers']['default_phone']; ?>" p-label="<?php echo $dynamic_phone['numbers']['default_phone'] ? $dynamic_phone['numbers']['default_phone'] : '888-555-0000'; ?>"/><br />
 
 				<hr />
 
@@ -230,19 +228,19 @@ function nlk_dynamic_phone_numbers() { ?>
 							<th></th>
 						</tr>
 						<tr>
-							<td><input type="text" size="8" name="nlk_dynamic_phone[numbers][query_string_value][0]" value="<?php echo $nlk_dynamic_phone['numbers']['query_string_value'][0]; ?>"/></td>
-							<td><input type="text" size="8" name="nlk_dynamic_phone[numbers][form_field_value][0]" value="<?php echo $nlk_dynamic_phone['numbers']['form_field_value'][0]; ?>"/></td>
-							<td><input type="text" size="8" name="nlk_dynamic_phone[numbers][cookie_value][0]" value="<?php echo $nlk_dynamic_phone['numbers']['cookie_value'][0]; ?>"/></td>
-							<td><input type="tel" size="20" name="nlk_dynamic_phone[numbers][dynamic_phone_number][0]" value="<?php echo $nlk_dynamic_phone['numbers']['dynamic_phone_number'][0]; ?>"/></td>
+							<td><input type="text" size="8" name="dynamic_phone[numbers][query_string_value][0]" value="<?php echo $dynamic_phone['numbers']['query_string_value'][0]; ?>"/></td>
+							<td><input type="text" size="8" name="dynamic_phone[numbers][form_field_value][0]" value="<?php echo $dynamic_phone['numbers']['form_field_value'][0]; ?>"/></td>
+							<td><input type="text" size="8" name="dynamic_phone[numbers][cookie_value][0]" value="<?php echo $dynamic_phone['numbers']['cookie_value'][0]; ?>"/></td>
+							<td><input type="tel" size="20" name="dynamic_phone[numbers][dynamic_phone_number][0]" value="<?php echo $dynamic_phone['numbers']['dynamic_phone_number'][0]; ?>"/></td>
 							<td><a class="phone-row-more" rel="0" style="cursor: pointer;">+ add row</a></td>
 						</tr>
 
-						<?php while ( $i < count( $nlk_dynamic_phone['numbers']['dynamic_phone_number'] ) ) { ?>
+						<?php while ( $i < count( $dynamic_phone['numbers']['dynamic_phone_number'] ) ) { ?>
 						<tr>
-							<td><input type="text" size="8" name="nlk_dynamic_phone[numbers][query_string_value][<?php echo $i; ?>]" value="<?php echo $nlk_dynamic_phone['numbers']['query_string_value'][ $i ]; ?>"/></td>
-							<td><input type="text" size="8" name="nlk_dynamic_phone[numbers][form_field_value][<?php echo $i; ?>]" value="<?php echo $nlk_dynamic_phone['numbers']['form_field_value'][ $i ]; ?>"/></td>
-							<td><input type="text" size="8" name="nlk_dynamic_phone[numbers][cookie_value][<?php echo $i; ?>]" value="<?php echo $nlk_dynamic_phone['numbers']['cookie_value'][ $i ]; ?>"/></td>
-							<td><input type="tel" size="20" name="nlk_dynamic_phone[numbers][dynamic_phone_number][<?php echo $i; ?>]" value="<?php echo $nlk_dynamic_phone['numbers']['dynamic_phone_number'][ $i ]; ?>"/></td>
+							<td><input type="text" size="8" name="dynamic_phone[numbers][query_string_value][<?php echo $i; ?>]" value="<?php echo $dynamic_phone['numbers']['query_string_value'][ $i ]; ?>"/></td>
+							<td><input type="text" size="8" name="dynamic_phone[numbers][form_field_value][<?php echo $i; ?>]" value="<?php echo $dynamic_phone['numbers']['form_field_value'][ $i ]; ?>"/></td>
+							<td><input type="text" size="8" name="dynamic_phone[numbers][cookie_value][<?php echo $i; ?>]" value="<?php echo $dynamic_phone['numbers']['cookie_value'][ $i ]; ?>"/></td>
+							<td><input type="tel" size="20" name="dynamic_phone[numbers][dynamic_phone_number][<?php echo $i; ?>]" value="<?php echo $dynamic_phone['numbers']['dynamic_phone_number'][ $i ]; ?>"/></td>
 							<td><a class="phone-row-more" rel="<?php echo $i; ?>" style="cursor: pointer;">+ add row</a></td>
 						</tr>
 						<?php $i++; } ?>
@@ -250,7 +248,7 @@ function nlk_dynamic_phone_numbers() { ?>
 					</tbody>
 				</table>
 			</section>
-	    <?php nlk_admin_form_wrapper( false ); ?>
+	    <?php dynamic_phone_admin_form_wrapper( false ); ?>
 	</div>
 	<?php
 }

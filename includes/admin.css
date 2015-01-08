@@ -1,17 +1,15 @@
-/** admin.css **/
+/** dynamic-phone : admin.css **/
 
+.wp-admin .dynamic_phone_admin { max-width: 700px; }
 
-body.wp-admin form[name="nlk_admin_form"] { max-width: 700px; }
+.wp-admin .dynamic_phone_admin section,
+.wp-admin #nlk_form_metabox section { padding: 10px 0 16px 0; }
 
+.wp-admin .dynamic_phone_admin section h3,
+.wp-admin #nlk_form_metabox section h3 { color: #333; }
 
-body.wp-admin form[name="nlk_admin_form"] section,
-body.wp-admin #nlk_form_metabox section { padding: 10px 0 16px 0; }
+.wp-admin .dynamic_phone_admin label,
+.wp-admin #nlk_form_metabox label { cursor: default; display: inline-block; font-weight: 700; vertical-align: top; width: 200px; }
 
-body.wp-admin form[name="nlk_admin_form"] section h3,
-body.wp-admin #nlk_form_metabox section h3 { color: #333; }
-
-body.wp-admin form[name="nlk_admin_form"] label,
-body.wp-admin #nlk_form_metabox label { cursor: default; display: inline-block; font-weight: 700; vertical-align: top; width: 200px; }
-
-body.wp-admin form[name="nlk_admin_form"] label.watermark,
-body.wp-admin #nlk_form_metabox label.watermark { font-weight: 400; width: auto; }
+.wp-admin .dynamic_phone_admin label.watermark,
+.wp-admin #nlk_form_metabox label.watermark { font-weight: 400; width: auto; }

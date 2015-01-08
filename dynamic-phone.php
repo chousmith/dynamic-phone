@@ -1,29 +1,26 @@
 <?php
-// nlk-usefulness.php
-
-
-   /*
-   Plugin Name: NLK Dynamic Phone Display
-   Plugin URI: http://ninthlink.com
-   Description: Display dynamic phone numbers based on URL query strings, form POST fields, or cookie data.
-   Version: 1.0
-   Author: Tim Spinks
-   Author URI: http://ninthlink.com
-   License: GPL2
-   */
+/*
+Plugin Name: Dynamic Phone Numbers
+Plugin URI: http://www.ninthlink.com
+Description: Display dynamic phone numbers based on URL query strings, form POST fields, or cookie data.
+Version: 1.0
+Author: Tim Spinks
+Author URI: http://ninthlink.com
+License: GPL2
+*/
 
 
 // Make sure we don't expose any info if called directly
 if ( !function_exists( 'add_action' ) ) {
-	echo 'Useful NLK features and functions';
+	echo 'Oops';
 	exit;
 }
 
-define('NLK_VERS', '1.0');
-define('NLK_PLUGIN_URL', plugin_dir_url( __FILE__ ));
+define('DYNAMIC_PHONE_VERS', '1.0');
+define('DYNAMIC_PHONE_PLUGIN_URL', plugin_dir_url( __FILE__ ));
 
 // Set plugin option defaults on first load
-function nlk_dynamic_phone_init_options() {
+function dynamic_phone_init_options() {
 
 	$default_options = array(
 			'shortcode'	=> array(
@@ -44,74 +41,65 @@ function nlk_dynamic_phone_init_options() {
 				),
 		);
 
-	if ( ! get_option( 'nlk_dynamic_phone' ) )
-		add_option( 'nlk_dynamic_phone', $default_options );
+	if ( ! get_option( 'dynamic_phone' ) )
+		add_option( 'dynamic_phone', $default_options );
 
 }
-add_action( 'admin_init', 'nlk_dynamic_phone_init_options' );
-
+add_action( 'admin_init', 'dynamic_phone_init_options' );
 
 // load page structures
-if ( is_admin() )
+if ( is_admin() ) {
 	require_once dirname( __FILE__ ) . '/admin-display.php';
-
-if ( !is_admin() ) {
-   //require_once dirname( __FILE__ ) . '/frontend.php';
 }
 
-
 // Get the set options for the following functions
-$nlk_dynamic_phone = get_option('nlk_dynamic_phone');
-
+$dynamic_phone = get_option('dynamic_phone');
 
 //----------------------------------------------------
 //
 //	Shortcodes
 //
 
-if ( $nlk_dynamic_phone['shortcode']['allow_in_widget'] && $nlk_dynamic_phone['shortcode']['allow_in_widget'] == 'yes'  && !has_filter('widget_text', 'do_shortcode') ) {
+if ( $dynamic_phone['shortcode']['allow_in_widget'] && $dynamic_phone['shortcode']['allow_in_widget'] == 'yes'  && !has_filter('widget_text', 'do_shortcode') ) {
 	add_filter('widget_text', 'do_shortcode');
 }
 
 // [phone_num number="8885551212" link=true format="standard"]
 function s_code_phone_num( $atts ) {
 
-	global $nlk_dynamic_phone;
+	global $dynamic_phone;
 
 	extract( shortcode_atts( array(
-		'number'	=> get_dynamic_phone_number(),
+		'number'	=> false,
+    'defaultfield' => false,
 		'link'		=> true,
 		'format'	=> 'standard',
 	), $atts ) );
-
+  
+  $defaultnumber = false;
+  if ( $defaultfield !== false ) {
+    if ( function_exists('get_field') ) {
+      $defaultnumber = get_field( $defaultfield );
+    }
+  }
+  
+  if ( $number === false ) {
+    $number = get_dynamic_phone_number( $defaultnumber );
+  }
+  
 	$clean_number = format_phone_us( $number, 'numeric' );
 	$formatted_number = format_phone_us( $number, $format );
 
 	$num = $formatted_number;
 
 	if ( $link === true ) {
-		$num = '<a href="tel:'.$clean_number.'">'.$formatted_number.'</a>';
+		$num = '<a href="tel:'.$clean_number.'">'. $num .'</a>';
 	}
 	
 	return $num;
 
 }
 add_shortcode( 'phone_num', 's_code_phone_num' );
-
-
-// [get_blog_info dir="url"]
-function s_code_get_site_dir( $atts ) {
-
-	extract( shortcode_atts( array(
-		'dir' => 'url',
-	), $atts ) );
-
-	$url = get_bloginfo( $dir );
-
-	return $url;
-
-}
-add_shortcode( 'get_blog_info', 's_code_get_site_dir' );
 
 
 //----------------------------------------------------
@@ -122,11 +110,11 @@ add_shortcode( 'get_blog_info', 's_code_get_site_dir' );
 // set cookie for dynamic number control
 function set_dynamic_phone_number_cookie( $k ) {
 
-	global $nlk_dynamic_phone;
+	global $dynamic_phone;
 
-	$name = $nlk_dynamic_phone['triggers']['cookie_name'];
-	$value = $nlk_dynamic_phone['numbers']['cookie_value'][ $k ];
-	$lifetime = 60 * 60 * 24 * $nlk_dynamic_phone['triggers']['cookie_lifetime'];
+	$name = $dynamic_phone['triggers']['cookie_name'];
+	$value = $dynamic_phone['numbers']['cookie_value'][ $k ];
+	$lifetime = 60 * 60 * 24 * $dynamic_phone['triggers']['cookie_lifetime'];
 	$path = get_bloginfo('url');
 	setcookie( $name, $value, $lifetime, $path );
 
@@ -136,24 +124,30 @@ function set_dynamic_phone_number_cookie( $k ) {
 
 
 // get dynamic number from GET, POST, or COOKIE
-function get_dynamic_phone_number() {
+function get_dynamic_phone_number( $defaultnumber ) {
 
-	global $nlk_dynamic_phone;
-	$num = $nlk_dynamic_phone['numbers']['default_phone']; // set default phone number
+	global $dynamic_phone;
+	// set default phone number
+  if ( $defaultnumber !== false ) {
+    // allow override
+    $num = $defaultnumber;
+  } else {
+    $num = $dynamic_phone['numbers']['default_phone'];
+  }
 	$k = false;
 
 	// first, if cookie is set, use that
-	if ( !empty( $_COOKIE[ $nlk_dynamic_phone['triggers']['cookie_name'] ] ) ) {
+	if ( !empty( $_COOKIE[ $dynamic_phone['triggers']['cookie_name'] ] ) ) {
 
-		$v = $_COOKIE[ $nlk_dynamic_phone['triggers']['cookie_name'] ]; // if cookie exists, set dynamic value as cookie value
-		$a = $nlk_dynamic_phone['numbers']['cookie_value']; // dynamic phone numbers array
+		$v = $_COOKIE[ $dynamic_phone['triggers']['cookie_name'] ]; // if cookie exists, set dynamic value as cookie value
+		$a = $dynamic_phone['numbers']['cookie_value']; // dynamic phone numbers array
 
 		if ( is_array( $a ) ) {
 			$k = array_search( $v, $a ); // check if value in phone array, and return associated key, or false
 		}
 
 		if ( $k !== false ) { // if array key value is set
-			$num = $nlk_dynamic_phone['numbers']['dynamic_phone_number'][$k]; // if key exists, return associated dynamic phone number, otherwise use default number
+			$num = $dynamic_phone['numbers']['dynamic_phone_number'][$k]; // if key exists, return associated dynamic phone number, otherwise use default number
 		}
 
 		return $num;
@@ -161,13 +155,13 @@ function get_dynamic_phone_number() {
 	}
 
 	// otherwise, check if GET or POST are set, and use those
-	if ( $_GET[ $nlk_dynamic_phone['triggers']['query_string_name'] ] ) {
-		$v = $_GET[ $nlk_dynamic_phone['triggers']['query_string_name'] ]; // if GET, set dynamic value as get value
-		$a = $nlk_dynamic_phone['numbers']['query_string_value']; // dynamic phone numbers array
+	if ( $_GET[ $dynamic_phone['triggers']['query_string_name'] ] ) {
+		$v = $_GET[ $dynamic_phone['triggers']['query_string_name'] ]; // if GET, set dynamic value as get value
+		$a = $dynamic_phone['numbers']['query_string_value']; // dynamic phone numbers array
 	}
-	else if ( $_POST[ $nlk_dynamic_phone['triggers']['form_field_name'] ] ) {
-		$v =  $_POST[ $nlk_dynamic_phone['triggers']['form_field_name'] ]; // if POST, set value as post value
-		$a = $nlk_dynamic_phone['numbers']['form_field_value']; // dynamic phone numbers array
+	else if ( $_POST[ $dynamic_phone['triggers']['form_field_name'] ] ) {
+		$v =  $_POST[ $dynamic_phone['triggers']['form_field_name'] ]; // if POST, set value as post value
+		$a = $dynamic_phone['numbers']['form_field_value']; // dynamic phone numbers array
 	}
 
 	if ( is_array( $a ) ) {
@@ -175,7 +169,7 @@ function get_dynamic_phone_number() {
 	}
 
 	if ( $k !== false ) { // if array key value is set
-		$num = $nlk_dynamic_phone['numbers']['dynamic_phone_number'][$k]; // if key exists, return associated dynamic phone number, otherwise use default number
+		$num = $dynamic_phone['numbers']['dynamic_phone_number'][$k]; // if key exists, return associated dynamic phone number, otherwise use default number
 		set_dynamic_phone_number_cookie( $k );
 	}
 
@@ -269,7 +263,3 @@ if ( ! function_exists('format_phone_us') ) {
 		}
 	}
 }
-
-
-
-?>
