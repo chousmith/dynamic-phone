@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Dynamic Phone Numbers
-Plugin URI: http://www.ninthlink.com
+Plugin URI: https://github.com/ninthlink/nlk-plugins/tree/master/dynamic-phone
 Description: Display dynamic phone numbers based on URL query strings, form POST fields, or cookie data.
 Version: 1.0
 Author: Tim Spinks
-Author URI: http://ninthlink.com
+Author URI: http://www.ninthlink.com
 License: GPL2
 */
 
