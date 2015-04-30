@@ -12,14 +12,9 @@ function dynamic_phone_admin_menu() {
 
 
 function dynamic_phone_admin_scripts() {
-
-    wp_register_script( 'jquery_watermark', DYNAMIC_PHONE_PLUGIN_URL . 'includes/jquery.watermark.min.js', array('jquery'). '1.3.3' );
-    wp_register_script( 'dynamic_phone_admin_js', DYNAMIC_PHONE_PLUGIN_URL . 'includes/admin.js', array('jquery', 'jquery_watermark'). '1.0' );
-    wp_register_style( 'dynamic_phone_admin_css', DYNAMIC_PHONE_PLUGIN_URL . 'includes/admin.css', array(). '1.0' );
-
-    wp_enqueue_script( 'jquery_watermark' );
-    wp_enqueue_script( 'dynamic_phone_admin_js' );
-    wp_enqueue_style( 'dynamic_phone_admin_css' );
+    wp_enqueue_script( 'jquery_watermark', DYNAMIC_PHONE_PLUGIN_URL . 'includes/jquery.watermark.min.js', array('jquery'), '1.3.3' );
+    wp_enqueue_script( 'dynamic_phone_admin_js', DYNAMIC_PHONE_PLUGIN_URL . 'includes/admin.js', array('jquery', 'jquery_watermark'), DYNAMIC_PHONE_VERS );
+    wp_enqueue_style( 'dynamic_phone_admin_css', DYNAMIC_PHONE_PLUGIN_URL . 'includes/admin.css', array(), DYNAMIC_PHONE_VERS );
 }
 add_action( 'admin_enqueue_scripts', 'dynamic_phone_admin_scripts' );
 
