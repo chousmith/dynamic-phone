@@ -25,7 +25,8 @@ add_action( 'admin_enqueue_scripts', 'dynamic_phone_admin_scripts' );
 //	Functions to build out admin pages
 //
 
-// set new options on save
+// set new options on save (not in the right place though?!)
+if ( isset( $_POST['dynamic_phone'] ) ) {
 if($_POST['dynamic_phone']['settings_submit'] == '1') {
 
 	$a = get_option( 'dynamic_phone', array() );
@@ -56,6 +57,7 @@ if($_POST['dynamic_phone']['settings_submit'] == '1') {
 	print_r($result);
 	echo '</pre></div>';
 
+}
 }
 $dynamic_phone = get_option('dynamic_phone');
 
